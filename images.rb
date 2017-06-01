@@ -30,13 +30,11 @@ class Image
 		self.array = temp_array
   end
 
-  # blur the 1s in the array within Manhattan Distance
+  # Task: BlurImage #3
+  # Using pattern processing
   def blur(n=1)
 
   	array = self.array
-
-  	# Make a copy of array, used for blurring
-  	# Use self.array to keep track of original 1s
   	temp_array = Marshal.load( Marshal.dump(array) )
 
   	# iterate through each cell
@@ -50,6 +48,7 @@ class Image
 
   				# We will process from the 1st affected row down to the last affected row.
   				# i_offset is the row offset from the original cell (j,j) with 1
+  				# then we will determine the start and end index for j
   				for i_offset in -1*n .. n
 
   					# determine current i to blur
@@ -79,6 +78,8 @@ class Image
 						
   				end
 
+  				temp_array[i][j] = 2 # to see the original x,y easier
+
   			end
 
   		end
@@ -88,6 +89,53 @@ class Image
 
   end
 
+  # Task: BlurImage #3
+  # Using regression
+  def blur2(n=1)
+  	array = self.array
+  	temp_array = Marshal.load( Marshal.dump(array) )
+  	# iterate through each cell
+  	i_length = array.length
+  	for i in 0..i_length-1
+  		row = array[i]
+  		for j in 0..row.length-1
+  			if 1 == array[i][j] # process cell with 1
+  				blur2_helper(temp_array, i, j, n)
+  				temp_array[i][j] = 2 # to see original i,j easier
+  			end
+  		end
+  	end
+  	self.array = temp_array
+  end
+
+  # can be priate, but leave it her for easy reference
+  def blur2_helper(array, x, y, step=1)
+  	if step <= 0
+  		array[x][y] = 1
+  	else
+  		get_blur_offset(offset, x+1, y, step-1)
+  		get_blur_offset(offset, x-1, y, step-1)
+  		get_blur_offset(offset, x, y+1, step-1)
+  		get_blur_offset(offset, x, y-1, step-1)
+  	end
+  end
+
+  # work in progres
+  def get_blur_offset(offset, x, y, step=1)
+  	if step <= 0
+  		key = "#{x}:#{y}"
+  		offset[key] = {:x => x, :y => y} if !offset.key?(key.to_sym)
+  	else
+  		get_blur_offset(offset, x+1, y, step-1)
+  		get_blur_offset(offset, x-1, y, step-1)
+  		get_blur_offset(offset, x, y+1, step-1)
+  		get_blur_offset(offset, x, y-1, step-1)
+  	end
+  	puts "\n\n"
+  	puts offset
+  end
+
+  # Task: BlurImage #2
   def blur_simple
   	array = self.array
   	# Make a copy of array, used for blurring
@@ -103,6 +151,7 @@ class Image
   				temp_array[i+1][j] = 1 if i+1 <= i_length-1
   				temp_array[i][j-1] = 1 if j-1 >= 0
   				temp_array[i][j+1] = 1 if j+1 <= j_length-1
+  				temp_array[i][j] = 2 # to see the original x,y easier
   			end
   		end
   	end
@@ -113,141 +162,144 @@ end
 
 class ImageTest
 
-	def self.test_reverse
-
-		puts "\n=====test_reverse\n\n"
-
-		image = Image.new([
-		  [0, 0, 0, 0],
-		  [0, 1, 0, 0],
-		  [0, 0, 0, 1],
-		  [0, 0, 0, 0]
+	def self.new_image(n)
+		puts "\n== create image #{n}"
+		case n
+		when 1
+			image = Image.new([
+		  [0, 0, 0, 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0],
+		  [0, 0, 1, 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0],
+		  [0, 0, 0, 0, 0, 1]
 		])
-		puts "== input array 1"
+		else
+			image = Image.new([
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 1, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 1, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [1, 0, 0, 0, 0, 0 , 0, 0, 0],
+		  [0, 0, 0, 0, 0, 0 , 0, 0, 0]
+		])
+		end
+		return image
+	end
+
+	def output_hash(h)
+  	h.each do |key, value|
+			p "#{key}:#{value}"
+  	end
+	end
+
+	def self.test_get_blur
+		puts "\n===== test_get_blur\n"
+		image = ImageTest.new_image(1)
+		offset = Hash.new
+		offset = image.get_blur_offset(offset, 3, 3, 2)
+		output_hash(offset)
+	end
+
+	def self.test_reverse
+		puts "\n===== test_reverse\n"
+		image = ImageTest.new_image(2)
 		image.output_image
-		puts "== reverse"
+		puts "\n== reverse"
 		image.reverse
 		image.output_image
-		puts "== reverse back"
+		puts "\n== reverse back"
 		image.reverse
 		image.output_image
 
 	end
 
-	def self.test_blur
+	def self.test_blur2
+		puts "\n===== test_blur2\n"
 
-		puts "\n===== test_blur\n\n"
-
-		image = Image.new([
-		  [0, 0, 0, 0],
-		  [0, 0, 0, 0],
-		  [0, 0, 0, 0],
-		  [0, 1, 0, 0],
-		  [0, 0, 0, 0],
-		  [0, 0, 0, 0]
-		])
-		puts "== input array #1"
+		image = ImageTest.new_image(1)
 		image.output_image
-		puts "== blur(1)"
+		puts "\n== blur2(1)"
 		image.blur(1)
 		image.output_image
 
-		image = Image.new([
-		  [0, 0, 0, 0],
-		  [0, 0, 0, 0],
-		  [0, 0, 0, 0],
-		  [0, 1, 0, 0],
-		  [0, 0, 0, 0],
-		  [0, 0, 0, 0]
-		])
-		puts "== input array #1"
+		image = ImageTest.new_image(1)
 		image.output_image
-		puts "== blur(2)"
+		puts "\n== blur2(2)"
 		image.blur(2)
 		image.output_image
 
-		image = Image.new([
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 1, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 1]
-		])
-		puts "== input array #2"
+		image = ImageTest.new_image(2)
 		image.output_image
-		puts "== blur(2)"
+		puts "\n== blur2(2)"
 		image.blur(2)
 		image.output_image
 
-		image = Image.new([
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 1, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 0],
-		  [0, 0, 0, 0, 0, 0 , 0, 0, 1]
-		])
-		puts "== input array #2"
+		image = ImageTest.new_image(2)
 		image.output_image
-		puts "== blur(3)"
+		puts "\n== blur2(3)"
+		image.blur(3)
+		image.output_image
+
+	end
+
+	def self.test_blur
+		puts "\n===== test_blur\n"
+
+		image = ImageTest.new_image(1)
+		image.output_image
+		puts "\n== blur(1)"
+		image.blur(1)
+		image.output_image
+
+		image = ImageTest.new_image(1)
+		image.output_image
+		puts "\n== blur(2)"
+		image.blur(2)
+		image.output_image
+
+		image = ImageTest.new_image(2)
+		image.output_image
+		puts "\n== blur(2)"
+		image.blur(2)
+		image.output_image
+
+		image = ImageTest.new_image(2)
+		image.output_image
+		puts "\n== blur(3)"
 		image.blur(3)
 		image.output_image
 
 	end
 
 	def self.test_blur_simple
+		puts "\n===== test_blur_simple\n"
 
-		puts "\n===== test_blur_simple\n\n"
-
-		image = Image.new([
-		  [0, 0, 0, 0, 0],
-		  [0, 1, 0, 0, 0],
-		  [0, 0, 0, 1, 0],
-		  [0, 0, 0, 1, 0],
-		  [1, 0, 0, 0, 0],
-		  [0, 0, 0, 0, 0]
-		])
-		puts "== input array #1"
+		image = ImageTest.new_image(1)
 		image.output_image
-		puts "== blur_simple"
+		puts "\n== blur_simple"
 		image.blur_simple
 		image.output_image
 
-		image = Image.new([
-		  [0, 0, 0, 0],
-		  [0, 0, 1, 0],
-		  [0, 0, 0, 0],
-		  [0, 1, 0, 0],
-		  [0, 0, 0, 0],
-		  [0, 0, 0, 0]
-		])
-		puts "== input array #2"
+		image = ImageTest.new_image(2)
 		image.output_image
-		puts "== blur_simple"
+		puts "\n== blur_simple"
 		image.blur_simple
 		image.output_image
-
 	end
 
 end
 
+ImageTest.test_blur2
 
-
+=begin
 ImageTest.test_reverse
 ImageTest.test_blur_simple
-ImageTest.test_blur
+=end
