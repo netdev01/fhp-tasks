@@ -17,7 +17,10 @@ class Image
   	puts output
   end
 
-  # reverse the image
+  #
+  # Task: BlurImage #1
+  # Reverse the image
+  #
   def reverse
   	array = self.array
 		temp_array = []
@@ -30,9 +33,13 @@ class Image
 		self.array = temp_array
   end
 
+  #
   # Task: BlurImage #3
-  # Using pattern processing
+  # Method 1: pattern processing
+  #
   def blur(n=1)
+
+		puts "\n== blur(#{n})"
 
   	array = self.array
   	temp_array = Marshal.load( Marshal.dump(array) )
@@ -89,10 +96,13 @@ class Image
 
   end
 
+  #
   # Task: BlurImage #3
-  # Using regression
+  # Method 2: regression
+  # Cleanest code
+  #
   def blur2(n=1)
-		puts "\n== blurs(#{n})"
+		puts "\n== blur2(#{n})"
   	array = self.array
   	temp_array = Marshal.load( Marshal.dump(array) )
   	# iterate through each cell
@@ -109,7 +119,7 @@ class Image
   	self.array = temp_array
   end
 
-  # can be priate, but leave it her for easy reference
+  # can be private, but leave it her for easy reference
   def blur2_helper(array, x_len, y_len, x, y, step=1)
 		if x >=0 && x <= x_len-1 && y >=0 && y <= y_len-1
 	  	if step <= 0
@@ -119,27 +129,62 @@ class Image
 	  		blur2_helper(array, x_len, y_len, x-1, y,   step-1)
 	  		blur2_helper(array, x_len, y_len, x,   y+1, step-1)
 	  		blur2_helper(array, x_len, y_len, x,   y-1, step-1)
+	  		blur2_helper(array, x_len, y_len, x+1, y+1, step-2)
 	  		blur2_helper(array, x_len, y_len, x-1, y-1, step-2)
-	  		blur2_helper(array, x_len, y_len, x+1, y+1,  step-2)
 	  	end
 	  end
   end
 
-  # work in progres
-  def get_blur_offset(step=1, offset=nil)
-		#puts "blur2_helper #{x_len} #{y_len} #{x} #{y} #{step}"
+  #
+  # Task: BlurImage #3
+  # Metho 3: offset hash table created through regression
+  # Should be the fastest code
+  #
+  def blur3(n) 
+		puts "\n== blur3(#{n})"
+  	array = self.array
+  	temp_array = Marshal.load( Marshal.dump(array) )
+  	offset = get_blur3_offset(n)
+  	# iterate through each cell
+  	i_length = array.length
+  	for i in 0..i_length-1
+  		row = array[i]
+  		for j in 0..row.length-1
+  			if 1 == array[i][j] # process cell with 1
+  				offset.each do |key, value|
+	  				i_blur = i + value[:x].to_i
+	  				j_blur = j + value[:y].to_i
+	  				# boundary conditions
+						i_blur = 0 if i_blur < 0
+						i_blur = i_length - 1 if i_blur > i_length - 1
+						j_blur = 0 if j_blur < 0
+						j_blur = row.length - 1 if j_blur > row.length - 1
+  					temp_array[i_blur][j_blur] = 1
+					end
+  				temp_array[i][j] = 2 # to see original i,j easier
+  			end
+  		end
+  	end
+  	self.array = temp_array
+  end
+
+  def get_blur3_offset(step=1, offset=nil)
   	offset = Hash.new if offset.nil?
-  	if step <= 0
+	  get_blur3_offset_helper(offset, 0, 0, step)
+	  return offset
+  end
+
+  def get_blur3_offset_helper(offset, x, y, step)
+  	if step >= 0
   		key = "#{x}:#{y}"
   		offset[key] = {:x => x, :y => y} if !offset.key?(key.to_sym)
-  	else
-  		get_blur_offset(offset, x+1, y, step-1)
-  		get_blur_offset(offset, x-1, y, step-1)
-  		get_blur_offset(offset, x, y+1, step-1)
-  		get_blur_offset(offset, x, y-1, step-1)
+  		get_blur3_offset_helper(offset, x+1, y, 	step-1)
+  		get_blur3_offset_helper(offset, x-1, y, 	step-1)
+  		get_blur3_offset_helper(offset, x,	 y+1, step-1)
+  		get_blur3_offset_helper(offset, x,	 y-1, step-1)
+	  	get_blur3_offset_helper(offset, x+1, y+1, step-2)
+	  	get_blur3_offset_helper(offset, x-1, y-1, step-2)
   	end
-  	puts "\n\n"
-  	puts offset
   end
 
   # Task: BlurImage #2
@@ -208,6 +253,11 @@ class ImageTest
   	end
 	end
 
+	def self.test_offset
+		image = ImageTest.new_image(1)
+		image.get_blur_offset(2, nil)
+	end
+
 	def self.test_get_blur
 		puts "\n===== test_get_blur\n"
 		image = ImageTest.new_image(1)
@@ -225,6 +275,31 @@ class ImageTest
 		image.output_image
 		puts "\n== reverse back"
 		image.reverse
+		image.output_image
+
+	end
+
+def self.test_blur3
+		puts "\n===== test_blur3\n"
+
+		image = ImageTest.new_image(1)
+		image.output_image
+		image.blur3(1)
+		image.output_image
+
+		image = ImageTest.new_image(1)
+		image.output_image
+		image.blur3(2)
+		image.output_image
+
+		image = ImageTest.new_image(2)
+		image.output_image
+		image.blur3(2)
+		image.output_image
+
+		image = ImageTest.new_image(2)
+		image.output_image
+		image.blur3(3)
 		image.output_image
 
 	end
@@ -295,9 +370,12 @@ class ImageTest
 
 end
 
-ImageTest.test_blur2
+ImageTest.test_blur3
 
 =begin
 ImageTest.test_reverse
 ImageTest.test_blur_simple
+ImageTest.test_blur
+ImageTest.test_blur2
+ImageTest.test_offset
 =end
