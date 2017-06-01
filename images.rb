@@ -50,11 +50,7 @@ class Image
 
   				# We will process from the 1st affected row down to the last affected row.
   				# i_offset is the row offset from the original cell (j,j) with 1
-  				#
-  				row_count = 0
   				for i_offset in -1*n .. n
-
-  					row_count = row_count + 1
 
   					# determine current i to blur
   					i_current = i + i_offset
