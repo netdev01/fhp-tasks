@@ -80,7 +80,9 @@ class Image
 						for current_j in j_start..j_end
 							temp_array[i_current][current_j] = 1
 						end
+						
   				end
+
   			end
 
   		end
