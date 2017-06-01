@@ -92,6 +92,7 @@ class Image
   # Task: BlurImage #3
   # Using regression
   def blur2(n=1)
+		puts "\n== blurs(#{n})"
   	array = self.array
   	temp_array = Marshal.load( Marshal.dump(array) )
   	# iterate through each cell
@@ -100,7 +101,7 @@ class Image
   		row = array[i]
   		for j in 0..row.length-1
   			if 1 == array[i][j] # process cell with 1
-  				blur2_helper(temp_array, i, j, n)
+  				blur2_helper(temp_array, i_length, row.length, i, j, n)
   				temp_array[i][j] = 2 # to see original i,j easier
   			end
   		end
@@ -109,19 +110,25 @@ class Image
   end
 
   # can be priate, but leave it her for easy reference
-  def blur2_helper(array, x, y, step=1)
-  	if step <= 0
-  		array[x][y] = 1
-  	else
-  		get_blur_offset(offset, x+1, y, step-1)
-  		get_blur_offset(offset, x-1, y, step-1)
-  		get_blur_offset(offset, x, y+1, step-1)
-  		get_blur_offset(offset, x, y-1, step-1)
-  	end
+  def blur2_helper(array, x_len, y_len, x, y, step=1)
+		if x >=0 && x <= x_len-1 && y >=0 && y <= y_len-1
+	  	if step <= 0
+	  		array[x][y] = 1
+	  	else
+	  		blur2_helper(array, x_len, y_len, x+1, y,   step-1)
+	  		blur2_helper(array, x_len, y_len, x-1, y,   step-1)
+	  		blur2_helper(array, x_len, y_len, x,   y+1, step-1)
+	  		blur2_helper(array, x_len, y_len, x,   y-1, step-1)
+	  		blur2_helper(array, x_len, y_len, x-1, y-1, step-2)
+	  		blur2_helper(array, x_len, y_len, x+1, y+1,  step-2)
+	  	end
+	  end
   end
 
   # work in progres
-  def get_blur_offset(offset, x, y, step=1)
+  def get_blur_offset(step=1, offset=nil)
+		#puts "blur2_helper #{x_len} #{y_len} #{x} #{y} #{step}"
+  	offset = Hash.new if offset.nil?
   	if step <= 0
   		key = "#{x}:#{y}"
   		offset[key] = {:x => x, :y => y} if !offset.key?(key.to_sym)
@@ -137,6 +144,7 @@ class Image
 
   # Task: BlurImage #2
   def blur_simple
+		puts "\n== blur_simple"
   	array = self.array
   	# Make a copy of array, used for blurring
   	# Use self.array to keep track of original 1s
@@ -226,26 +234,22 @@ class ImageTest
 
 		image = ImageTest.new_image(1)
 		image.output_image
-		puts "\n== blur2(1)"
-		image.blur(1)
+		image.blur2(1)
 		image.output_image
 
 		image = ImageTest.new_image(1)
 		image.output_image
-		puts "\n== blur2(2)"
-		image.blur(2)
+		image.blur2(2)
 		image.output_image
 
 		image = ImageTest.new_image(2)
 		image.output_image
-		puts "\n== blur2(2)"
-		image.blur(2)
+		image.blur2(2)
 		image.output_image
 
 		image = ImageTest.new_image(2)
 		image.output_image
-		puts "\n== blur2(3)"
-		image.blur(3)
+		image.blur2(3)
 		image.output_image
 
 	end
@@ -255,25 +259,21 @@ class ImageTest
 
 		image = ImageTest.new_image(1)
 		image.output_image
-		puts "\n== blur(1)"
 		image.blur(1)
 		image.output_image
 
 		image = ImageTest.new_image(1)
 		image.output_image
-		puts "\n== blur(2)"
 		image.blur(2)
 		image.output_image
 
 		image = ImageTest.new_image(2)
 		image.output_image
-		puts "\n== blur(2)"
 		image.blur(2)
 		image.output_image
 
 		image = ImageTest.new_image(2)
 		image.output_image
-		puts "\n== blur(3)"
 		image.blur(3)
 		image.output_image
 
@@ -284,13 +284,11 @@ class ImageTest
 
 		image = ImageTest.new_image(1)
 		image.output_image
-		puts "\n== blur_simple"
 		image.blur_simple
 		image.output_image
 
 		image = ImageTest.new_image(2)
 		image.output_image
-		puts "\n== blur_simple"
 		image.blur_simple
 		image.output_image
 	end
