@@ -98,7 +98,7 @@ class Image
 
   #
   # Task: BlurImage #3
-  # Method 2: regression
+  # Method 2: recursion
   # Cleanest code
   #
   def blur2(n=1)
@@ -137,7 +137,7 @@ class Image
 
   #
   # Task: BlurImage #3
-  # Metho 3: offset hash table created through regression
+  # Metho 3: offset hash table created through recursion
   # Should be the fastest code
   #
   def blur3(n) 

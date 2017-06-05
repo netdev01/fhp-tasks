@@ -1,5 +1,6 @@
 
 class LinkedListNode
+
 	attr_accessor :value, :next_node
 
 	def initialize(value, next_node=nil)
@@ -7,6 +8,9 @@ class LinkedListNode
 		@next_node = next_node # LIFO
 	end
 
+	#
+	# Reverse the list with using stack
+	#
 	def self.reverse_list1(list)
 		stack = Stack.new
 		new_list = nil
@@ -21,20 +25,27 @@ class LinkedListNode
 		return new_list
 	end
 
+	#
+	# Reverse the list by switching the direction of next_node
+	#
 	def self.reverse_list2(list, previous=nil)
-
-		return nil if list.nil?
-=begin
 		return nil if list.nil?
 		if list.next_node.nil?
 			list.next_node = previous
+			head = list
+			return head
 		else
-			list.next_node = nil if previous.nil?
-			reverse_list2(list->next_node, list)
+			head = reverse_list2(list.next_node, list)
+			if previous.nil?
+				list.next_node = nil 
+			else
+				list.next_node = previous
+			end
 		end
-=end
+		return head 
 	end
 
+	# work in progress
 	def self.append_node(list, stack)
 		if !stack.nil?
 			value = stack.pop
@@ -43,10 +54,25 @@ class LinkedListNode
 		end
 	end
 
-	def self.print_values(list_node)
-		if !list_node.nil?
-			print "#{list_node.value} --> "
-			print_values(list_node.next_node)
+	def self.print_node(note, node)
+		if node.nil?
+			text = note + ", node=nil"
+			puts text
+			return
+		end
+		text = note + ", value=" + node.value.to_s
+		if node.next_node.nil?
+			text = text + ", next=nil" 
+		else
+			text = text + ", next=" + node.next_node.value.to_s
+		end
+		puts text
+	end
+
+	def self.print_values(list)
+		if !list.nil?
+			print "#{list.value} --> "
+			print_values(list.next_node)
 		else
 			print "nil\n"
 			return
@@ -56,6 +82,7 @@ class LinkedListNode
 end
 
 class Stack
+
 	attr_reader :data
 
 	def initialize
@@ -99,12 +126,14 @@ LinkedListNode.print_values(node2)
 LinkedListNode.print_values(node3)
 
 puts "\n===== reverse_list1"
+LinkedListNode.print_values(node3)
 revlist = LinkedListNode.reverse_list1(node3)
 LinkedListNode.print_values(revlist)
 revlist = LinkedListNode.reverse_list1(revlist)
 LinkedListNode.print_values(revlist)
 
 puts "\n===== reverse_list2"
+LinkedListNode.print_values(node3)
 revlist = LinkedListNode.reverse_list2(node3)
 LinkedListNode.print_values(revlist)
 revlist = LinkedListNode.reverse_list2(revlist)
