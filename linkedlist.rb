@@ -1,3 +1,4 @@
+require 'pry'
 
 class LinkedListNode
 
@@ -143,4 +144,4 @@ puts "\n===== Stack push twice: 3, 5"
 stack1 = Stack.new
 stack1.push(3)
 stack1.push(5)
-puts "pop twice: " +  stack1.pop.to_s + " " + stack1.pop.to_s
+puts "pop twice: #{stack1.pop}, #{stack1.pop}"

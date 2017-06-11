@@ -21,8 +21,10 @@ def recursive_fib2(n, memo = {})
   memo[n] ||= recursive_fib2(n-1, memo) + recursive_fib2(n-2, memo)
 end
 
+require 'pry'
 require 'benchmark'
-n = 35
+
+n = 30
 Benchmark.bm do |x|
 	x.report("iterative_fib") { iterative_fib(n) } 
 	x.report("recursive_fib") { recursive_fib(n) } 
