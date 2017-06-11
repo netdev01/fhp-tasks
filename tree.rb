@@ -118,4 +118,4 @@ node = trunk.depth_search(trunk, 20)
 puts "\ntrunk.breadth_search 5, 11, 20"
 node = trunk.breadth_search(trunk, 5)
 node = trunk.breadth_search(trunk, 11)
-#node = trunk.breadth_search(trunk, 20)
+node = trunk.breadth_search(trunk, 20)
