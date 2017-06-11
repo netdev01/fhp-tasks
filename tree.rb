@@ -28,10 +28,15 @@ class Tree
 
   # breadth search using queue & recursion
   def breadth_search(node, payload, queue=nil)
+
   	queue = MyQueue.new if queue.nil?
+
   	if node.nil?
+
   		return nil
+
   	else
+
   		child0 = node.children[0]
   		child1 = node.children[1]
 
@@ -40,30 +45,42 @@ class Tree
   		queue.enqueue(child1) if !child1.nil?
 
   		# dequeue
+  		return nil if queue.nil?
   		current_node = queue.dequeue
+  		return nil if current_node.nil?
   		puts current_node.payload
+
+  		# found payload
   		if current_node.payload == payload
 	  		puts "found => payload=#{payload}, current_node.payload=#{current_node.payload}"
   			return current_node 
   		end
-  		return nil if queue.nil?
   		
 			if !current_node.children[0].nil? || !current_node.children[1].nil?
+
   			# if a child exists, update current node and recurse
 				breadth_search(current_node, payload, queue)
+
 			else
+
 				# if no children, dequeue and recurse
+  			return nil if queue.nil?
 				current_node = queue.dequeue
+  			return nil if current_node.nil?
   			puts current_node.payload
+
+  			# found payload
 	  		if current_node.payload == payload
 		  		puts "found => payload=#{payload}, current_node.payload=#{current_node.payload}"
 	  			return current_node 
 	  		end
-  			return nil if queue.nil?
+
 				breadth_search(current_node, payload, queue)
+
 			end
 
   	end
+  	
   end
 
   def print_tree_depth()
@@ -116,6 +133,6 @@ node = trunk.depth_search(trunk, 20)
 
 
 puts "\ntrunk.breadth_search 5, 11, 20"
-node = trunk.breadth_search(trunk, 5)
+node = trunk.breadth_search(trunk, 20)
 node = trunk.breadth_search(trunk, 11)
 node = trunk.breadth_search(trunk, 20)
